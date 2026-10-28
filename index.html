@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam AS - Matematika Lanjut Fase F (Limit)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- KONFIGURASI MathJax: harus dipasang SEBELUM script MathJax dimuat -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']],
+        processEscapes: true
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+  <style>
+    .no-select { user-select: none; }
+    mjx-container { max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans min-h-screen no-select">
+
+  <div id="app">
+    <!-- HALAMAN LOGIN -->
+    <div id="page-login" class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white p-8 rounded-xl shadow-lg max-w-md w-full border border-gray-200">
+        <div class="text-center mb-6">
+          <div class="inline-block p-3 bg-blue-600 text-white rounded-full mb-3 shadow">
+            <i class="fa-solid font-bold text-2xl fa-laptop-code"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800">EXAM AS</h2>
+          <p class="text-sm text-gray-500">Matematika Lanjut Fase F - Materi Limit</p>
+        </div>
+        <div id="login-error" class="hidden mb-4 p-3 bg-red-100 text-red-700 text-sm rounded-lg"></div>
+        <form onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Username</label>
+            <input type="text" id="username" required placeholder="Masukkan username" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+            <input type="password" id="password" required placeholder="Masukkan password" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition shadow">Masuk Ujian</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- HALAMAN ADMIN -->
+    <div id="page-admin" class="hidden min-h-screen bg-gray-50">
+      <nav class="bg-blue-800 text-white p-4 shadow-md flex justify-between items-center px-6">
+        <h1 class="text-lg font-bold"><i class="fa-solid fa-user-shield mr-2"></i>Panel Administrator Exam AS</h1>
+        <div class="flex items-center space-x-3">
+          <button onclick="showHasilPage()" class="bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded text-sm font-semibold"><i class="fa-solid fa-square-poll-vertical mr-1"></i> Lihat Hasil Ujian</button>
+          <button onclick="logout()" class="bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded text-sm"><i class="fa-solid fa-sign-out-alt mr-1"></i>Keluar</button>
+        </div>
+      </nav>
+      
+      <div class="p-6 max-w-6xl mx-auto space-y-6">
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="bg-white p-6 rounded-xl shadow border border-blue-100 flex flex-col items-center justify-center">
+            <span class="text-gray-500 text-sm font-medium mb-1">TOKEN AKTIF (Reset Tiap 2 Menit)</span>
+            <div id="admin-token" class="text-4xl font-black text-blue-600 tracking-widest my-2">------</div>
+            <span id="token-timer" class="text-xs text-gray-400">Memuat token...</span>
+          </div>
+
+          <div class="bg-white p-6 rounded-xl shadow border border-gray-100 space-y-3">
+            <h3 class="text-md font-bold text-gray-800 border-b pb-2">Pengaturan Jadwal & Waktu Ujian</h3>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600">Tanggal Mulai</label>
+                <input type="date" id="cfg-start-date" class="w-full border px-3 py-1.5 rounded text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600">Jam Mulai</label>
+                <input type="time" id="cfg-start-time" class="w-full border px-3 py-1.5 rounded text-sm">
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600">Tanggal Selesai</label>
+                <input type="date" id="cfg-end-date" class="w-full border px-3 py-1.5 rounded text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600">Jam Selesai</label>
+                <input type="time" id="cfg-end-time" class="w-full border px-3 py-1.5 rounded text-sm">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600">Durasi (Menit)</label>
+              <input type="number" id="cfg-duration" value="30" class="w-full border px-3 py-1.5 rounded text-sm">
+            </div>
+            <div class="flex gap-2 pt-1">
+              <button onclick="saveAdminConfig()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-semibold flex-1">Simpan Jadwal</button>
+              <button onclick="resetAdminConfig()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded text-sm font-semibold">Reset Jadwal</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monitoring Peserta -->
+        <div class="bg-white p-6 rounded-xl shadow border border-gray-100">
+          <div class="flex justify-between items-center mb-4 border-b pb-2">
+            <h3 class="text-md font-bold text-gray-800">Monitoring Peserta Ujian</h3>
+            <button onclick="resetMonitorData()" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded text-xs font-semibold border border-red-300">
+              <i class="fa-solid fa-rotate-right mr-1"></i> Reset Monitoring
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-gray-600 border-collapse">
+              <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+                <tr>
+                  <th class="p-3 border-b">Username</th>
+                  <th class="p-3 border-b">Nama Peserta</th>
+                  <th class="p-3 border-b">Kelas</th>
+                  <th class="p-3 border-b">Status</th>
+                  <th class="p-3 border-b">Progres</th>
+                  <th class="p-3 border-b">Pelanggaran</th>
+                </tr>
+              </thead>
+              <tbody id="table-peserta-body">
+                <tr><td colspan="6" class="p-4 text-center text-gray-400">Belum ada data peserta.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HALAMAN KHUSUS HASIL UJIAN (ADMIN) -->
+    <div id="page-hasil" class="hidden min-h-screen bg-gray-50">
+      <nav class="bg-blue-800 text-white p-4 shadow-md flex justify-between items-center px-6">
+        <h1 class="text-lg font-bold"><i class="fa-solid fa-square-poll-vertical mr-2"></i>Rekap Hasil Ujian - Exam AS</h1>
+        <div class="flex items-center space-x-3">
+          <button onclick="showAdminDashboard()" class="bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded text-sm font-semibold"><i class="fa-solid fa-house mr-1"></i> Home (Dashboard)</button>
+          <button onclick="logout()" class="bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded text-sm"><i class="fa-solid fa-sign-out-alt mr-1"></i>Keluar</button>
+        </div>
+      </nav>
+      <div class="p-6 max-w-6xl mx-auto space-y-6">
+        <div class="bg-white p-6 rounded-xl shadow border border-gray-100">
+          <div class="flex justify-between items-center mb-4 border-b pb-2">
+            <h3 class="text-md font-bold text-gray-800">Daftar Hasil Ujian Peserta</h3>
+            <button onclick="fetchHasilData()" class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs font-semibold hover:bg-blue-200"><i class="fa-solid fa-arrows-rotate mr-1"></i> Muat Ulang</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-gray-600 border-collapse">
+              <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+                <tr>
+                  <th class="p-3 border-b">Waktu Kirim</th>
+                  <th class="p-3 border-b">Username</th>
+                  <th class="p-3 border-b">Nama</th>
+                  <th class="p-3 border-b">Kelas</th>
+                  <th class="p-3 border-b">Benar / Total</th>
+                  <th class="p-3 border-b">Nilai Akhir</th>
+                  <th class="p-3 border-b text-center">Aksi (Ulangi Ujian)</th>
+                </tr>
+              </thead>
+              <tbody id="table-hasil-body">
+                <tr><td colspan="7" class="p-4 text-center text-gray-400">Memuat hasil ujian...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HALAMAN TATA TERTIB & TOKEN PESERTA -->
+    <div id="page-rules" class="hidden min-h-screen flex items-center justify-center p-4">
+      <div class="bg-white p-8 rounded-xl shadow-xl max-w-2xl w-full border border-gray-200">
+        <h2 class="text-xl font-bold text-blue-800 border-b pb-3 mb-4"><i class="fa-solid fa-file-contract mr-2"></i>Tata Tertib Exam AS</h2>
+        <div id="student-info" class="mb-4 bg-blue-50 p-3 rounded-lg text-sm text-blue-900 font-medium"></div>
+        <ul class="list-disc list-inside text-sm text-gray-700 space-y-2 mb-6">
+          <li>Dilarang membuka tab baru atau meninggalkan jendela ujian.</li>
+          <li>Apabila terindikasi curang, sistem akan mengunci dan kembali ke halaman token.</li>
+          <li>Ujian terdiri dari 12 soal acak materi Limit Matematika Lanjut Fase F.</li>
+        </ul>
+        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 mb-6">
+          <label class="block text-xs font-bold text-yellow-800 uppercase mb-1">Konfirmasi Token Ujian</label>
+          <div class="flex gap-2">
+            <input type="text" id="input-token" placeholder="Masukkan Token 6 Digit" class="uppercase tracking-widest font-bold border rounded px-4 py-2 w-full focus:ring-2 focus:ring-yellow-500 outline-none">
+            <button onclick="validateToken()" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold px-6 py-2 rounded transition">MASUK</button>
+          </div>
+          <p id="token-error" class="text-xs text-red-600 mt-2 hidden font-medium"></p>
+        </div>
+        <button onclick="logout()" class="text-sm text-gray-500 hover:underline">← Kembali ke Login</button>
+      </div>
+    </div>
+
+    <!-- HALAMAN UTAMA UJIAN -->
+    <div id="page-exam" class="hidden min-h-screen flex flex-col bg-gray-100">
+      <header class="bg-blue-900 text-white px-6 py-3 shadow flex justify-between items-center sticky top-0 z-10">
+        <div class="flex items-center space-x-4">
+          <span class="font-bold text-lg">Exam AS</span>
+          <span class="bg-blue-700 text-xs px-2.5 py-1 rounded-full">Matematika Lanjut Fase F</span>
+        </div>
+        <div class="flex items-center space-x-6">
+          <div class="bg-blue-950 px-4 py-1.5 rounded-lg border border-blue-700 flex items-center space-x-2">
+            <i class="fa-solid fa-clock text-yellow-400"></i>
+            <span class="text-xs text-gray-300">Sisa Waktu:</span>
+            <span id="exam-timer" class="font-mono text-lg font-bold text-white">00:00:00</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="flex-1 flex max-w-7xl w-full mx-auto p-4 gap-4 relative">
+        <main class="flex-1 bg-white rounded-xl shadow-md p-6 flex flex-col justify-between border border-gray-200">
+          <div>
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+              <span id="question-number-title" class="font-bold text-gray-700 text-lg">Soal No. 1</span>
+              <span id="question-type-badge" class="text-xs bg-gray-100 border text-gray-600 px-2 py-1 rounded">Pilihan Ganda</span>
+            </div>
+            <div id="question-text" class="text-gray-800 text-base leading-relaxed mb-6 font-medium"></div>
+            <div id="options-container" class="space-y-3"></div>
+          </div>
+          <footer class="border-t pt-4 mt-8 flex justify-between items-center">
+            <button id="btn-prev" onclick="prevQuestion()" class="bg-gray-600 hover:bg-gray-700 text-white font-bold px-5 py-2 rounded-lg text-sm">Sebelum</button>
+            <label class="flex items-center space-x-2 bg-yellow-100 border border-yellow-300 text-yellow-900 px-4 py-2 rounded-lg cursor-pointer">
+              <input type="checkbox" id="chk-ragu" onchange="toggleRagu()" class="w-4 h-4 text-yellow-600 rounded">
+              <span class="font-semibold text-sm">Ragu-Ragu</span>
+            </label>
+            <button id="btn-next" onclick="nextQuestion()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2 rounded-lg text-sm">Berikut</button>
+            <button id="btn-finish" onclick="showFinishConfirmation()" class="hidden bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2 rounded-lg text-sm">Selesai</button>
+          </footer>
+        </main>
+        
+        <aside id="sidebar-map" class="w-80 bg-white rounded-xl shadow-md p-5 border border-gray-200 block">
+          <h3 class="font-bold text-gray-800 mb-3 border-b pb-2">Navigasi Soal</h3>
+          <div class="grid grid-cols-4 gap-2 mb-6" id="grid-map-soal"></div>
+          <div class="border-t pt-4 text-xs space-y-2 text-gray-600">
+            <div class="flex items-center space-x-2"><span class="w-4 h-4 bg-red-500 rounded inline-block"></span><span>Belum dikerjakan</span></div>
+            <div class="flex items-center space-x-2"><span class="w-4 h-4 bg-green-500 rounded inline-block"></span><span>Sudah diisi</span></div>
+            <div class="flex items-center space-x-2"><span class="w-4 h-4 bg-yellow-400 rounded inline-block"></span><span>Ragu-ragu</span></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- MODAL KONFIRMASI -->
+    <div id="modal-finish" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 text-center space-y-4">
+        <h3 class="text-xl font-bold text-gray-800">Konfirmasi Pengiriman</h3>
+        <p class="text-sm text-gray-600">Apakah Anda yakin ingin menyelesaikan ujian? Jawaban akan dikirim ke server.</p>
+        <div class="flex space-x-3 pt-2">
+          <button onclick="closeFinishModal()" class="w-1/2 border py-2 rounded-lg">Batal</button>
+          <button onclick="submitExam()" class="w-1/2 bg-green-600 text-white py-2 rounded-lg font-semibold">Kirim</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL CHEATING -->
+    <div id="modal-cheat" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 text-center space-y-4">
+        <h3 class="text-xl font-bold text-red-600">Peringatan Kecurangan!</h3>
+        <p class="text-sm text-gray-600">Anda terdeteksi berpindah tab/jendela. Anda dikembalikan ke halaman token.</p>
+        <button onclick="acknowledgeCheat()" class="w-full bg-red-600 text-white py-2 rounded-lg font-semibold">Saya Mengerti</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCUYlOc0_iKV9LTDkjKOXFQgsdDaC9pz06rcrmyb53pKsTplUaVLbtntr4kjaElXHZ/exec";
+    
+    // Bank soal: 12 nomor x 4 variasi, bersumber dari LMT - ALL - 2026.docx
+    // Setiap nomor diundi acak 1 dari 4 variasi. Kunci diverifikasi dengan perhitungan limit;
+    // soal 9.1, 9.3, 10.4, 11.1, 11.3 dikoreksi (hasil -∞) dan opsi -∞ ditambahkan.
+// Gambar ayunan (soal no. 8) ditanam langsung sebagai data URI agar tetap tampil di Google Apps Script
+const IMG_AYUNAN = "data:image/png;base64,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";
+
+// Teks pengantar soal no. 8 (sama untuk semua variasi; hanya persamaan W dan sudut s yang berbeda)
+const stemAyunan = (w, sdt) => `<img src="${IMG_AYUNAN}" alt="Ilustrasi ayunan" class="float-right ml-4 mb-2 w-28 sm:w-36 h-auto select-none pointer-events-none" draggable="false">Dalam ilmu fisika, <b>usaha</b> (<i>work</i>) adalah energi yang disalurkan kepada atau dari suatu benda melalui penerapan gaya yang menyebabkan benda tersebut mengalami perpindahan.<br>Budi mendorong sebuah ayunan yang memenuhi persamaan \\(${w}\\). Akibatnya ayunan tersebut bergerak dan perpindahanya dinyatakan dalam sudut \\(${sdt}\\) Jika usaha (<i>W</i>) merupakan gaya (<i>F</i>) dikali perpindahan (<i>s</i>) dan <i>x</i> merupakan besar gaya dalam newton, maka tentukan nilai dari pernyataan berikut !<div style="clear:both"></div>`;
+
+const BANK_SOAL = [
+      // SOAL 1
+      [
+        { q: "Nilai dari \\(\\lim_{x \\to 2} \\frac{x-2}{x^2+4}\\) adalah ....", options: ["A. \\(0\\)", "B. \\(\\infty\\)", "C. \\(1\\)", "D. \\(2\\)", "E. \\(4\\)"], ans: "A" },
+        { q: "Nilai dari \\(\\lim_{x \\to 2} \\frac{x+2}{x^2-4}\\) adalah ....", options: ["A. \\(0\\)", "B. \\(\\infty\\)", "C. \\(1\\)", "D. \\(2\\)", "E. \\(4\\)"], ans: "B" },
+        { q: "Nilai dari \\(\\lim_{x \\to 3} \\frac{x-3}{x^2+9}\\) adalah ....", options: ["A. \\(0\\)", "B. \\(\\infty\\)", "C. \\(1\\)", "D. \\(2\\)", "E. \\(4\\)"], ans: "A" },
+        { q: "Nilai dari \\(\\lim_{x \\to 3} \\frac{x+3}{x^2-9}\\) adalah ....", options: ["A. \\(0\\)", "B. \\(\\infty\\)", "C. \\(1\\)", "D. \\(2\\)", "E. \\(4\\)"], ans: "B" }
+      ],
+      // SOAL 2
+      [
+        { q: "Hasil dari \\(\\lim_{x \\to 4} \\frac{x^2+2x-24}{x-4}\\) adalah ....", options: ["A. \\(-10\\)", "B. \\(-2\\)", "C. \\(0\\)", "D. \\(2\\)", "E. \\(10\\)"], ans: "E" },
+        { q: "Nilai dari \\(\\lim_{x \\to 3} \\frac{x^2+5x-24}{x-3}\\) adalah ....", options: ["A. \\(-11\\)", "B. \\(-5\\)", "C. \\(0\\)", "D. \\(5\\)", "E. \\(11\\)"], ans: "E" },
+        { q: "Nilai dari \\(\\lim_{x \\to 2} \\frac{x^2+4x-12}{x-2}\\) adalah ....", options: ["A. \\(-8\\)", "B. \\(-4\\)", "C. \\(0\\)", "D. \\(4\\)", "E. \\(8\\)"], ans: "E" },
+        { q: "Nilai dari \\(\\lim_{x \\to 2} \\frac{x^2+10x-24}{x-2}\\) adalah ....", options: ["A. \\(-14\\)", "B. \\(-10\\)", "C. \\(0\\)", "D. \\(10\\)", "E. \\(14\\)"], ans: "E" }
+      ],
+      // SOAL 3
+      [
+        { q: "Nilai dari \\(\\lim_{x \\to 0} \\frac{4x^2-8x}{x^3-2x^2}\\) adalah ....", options: ["A. \\(-2\\)", "B. \\(\\infty\\)", "C. \\(0\\)", "D. \\(2\\)", "E. \\(4\\)"], ans: "B" },
+        { q: "Nilai dari \\(\\lim_{x \\to 0} \\frac{x^3-2x^2}{4x^2-8x}\\) adalah ....", options: ["A. \\(-2\\)", "B. \\(\\infty\\)", "C. \\(0\\)", "D. \\(2\\)", "E. \\(4\\)"], ans: "C" },
+        { q: "Nilai dari \\(\\lim_{x \\to 0} \\frac{2x^2-8x}{x^3-4x^2}\\) adalah ....", options: ["A. \\(-4\\)", "B. \\(\\infty\\)", "C. \\(0\\)", "D. \\(4\\)", "E. \\(8\\)"], ans: "B" },
+        { q: "Nilai dari \\(\\lim_{x \\to 0} \\frac{x^3-4x^2}{2x^2-8x}\\) adalah ....", options: ["A. \\(-4\\)", "B. \\(\\infty\\)", "C. \\(0\\)", "D. \\(4\\)", "E. \\(8\\)"], ans: "C" }
+      ],
+      // SOAL 4
+      [
+        { q: "Hasil dari \\(\\lim_{x \\to 9} \\frac{9-x}{\\sqrt{x}-3}\\) adalah ....", options: ["A. \\(6\\)", "B. \\(3\\)", "C. \\(\\infty\\)", "D. \\(-3\\)", "E. \\(-6\\)"], ans: "E" },
+        { q: "Hasil dari \\(\\lim_{x \\to 9} \\frac{x-9}{3-\\sqrt{x}}\\) adalah ....", options: ["A. \\(6\\)", "B. \\(3\\)", "C. \\(\\infty\\)", "D. \\(-3\\)", "E. \\(-6\\)"], ans: "E" },
+        { q: "Hasil dari \\(\\lim_{x \\to 4} \\frac{4-x}{\\sqrt{x}-2}\\) adalah ....", options: ["A. \\(4\\)", "B. \\(2\\)", "C. \\(\\infty\\)", "D. \\(-2\\)", "E. \\(-4\\)"], ans: "E" },
+        { q: "Hasil dari \\(\\lim_{x \\to 4} \\frac{x-4}{2-\\sqrt{x}}\\) adalah ....", options: ["A. \\(4\\)", "B. \\(2\\)", "C. \\(\\infty\\)", "D. \\(-2\\)", "E. \\(-4\\)"], ans: "E" }
+      ],
+      // SOAL 5
+      [
+        { q: "\\(\\lim_{x \\to 3} \\frac{x^2+5x-24}{\\sqrt{x+1}-2} = \\ldots\\)", options: ["A. \\(11\\)", "B. \\(26\\)", "C. \\(44\\)", "D. \\(53\\)", "E. \\(66\\)"], ans: "C" },
+        { q: "\\(\\lim_{x \\to 2} \\frac{x^2+4x-12}{\\sqrt{x+7}-3} = \\ldots\\)", options: ["A. \\(24\\)", "B. \\(33\\)", "C. \\(48\\)", "D. \\(55\\)", "E. \\(62\\)"], ans: "C" },
+        { q: "\\(\\lim_{x \\to 3} \\frac{x^2+5x-24}{\\sqrt{x+6}-3} = \\ldots\\)", options: ["A. \\(22\\)", "B. \\(35\\)", "C. \\(44\\)", "D. \\(58\\)", "E. \\(66\\)"], ans: "E" },
+        { q: "\\(\\lim_{x \\to 4} \\frac{x^2+2x-24}{\\sqrt{x+5}-3} = \\ldots\\)", options: ["A. \\(27\\)", "B. \\(33\\)", "C. \\(42\\)", "D. \\(55\\)", "E. \\(60\\)"], ans: "E" }
+      ],
+      // SOAL 6
+      [
+        { q: "Nilai dari \\(\\lim_{x \\to 0} \\frac{\\sin 3x}{5x}\\) adalah ....", options: ["A. \\(\\frac{3x}{5x}\\)", "B. \\(\\frac{5x}{3x}\\)", "C. \\(\\frac{3x}{3x}\\)", "D. \\(\\frac{5}{3}\\)", "E. \\(\\frac{3}{5}\\)"], ans: "E" },
+        { q: "Nilai dari \\(\\lim_{x \\to 0} \\frac{3x}{\\sin 5x}\\) adalah ....", options: ["A. \\(\\frac{3x}{5x}\\)", "B. \\(\\frac{5x}{3x}\\)", "C. \\(\\frac{5x}{5x}\\)", "D. \\(\\frac{5}{3}\\)", "E. \\(\\frac{3}{5}\\)"], ans: "E" },
+        { q: "Nilai dari \\(\\lim_{x \\to 0} \\frac{\\sin 5x}{3x}\\) adalah ....", options: ["A. \\(\\frac{3x}{5x}\\)", "B. \\(\\frac{5x}{3x}\\)", "C. \\(\\frac{3x}{3x}\\)", "D. \\(\\frac{5}{3}\\)", "E. \\(\\frac{3}{5}\\)"], ans: "D" },
+        { q: "Nilai dari \\(\\lim_{x \\to 0} \\frac{5x}{\\sin 3x}\\) adalah ....", options: ["A. \\(\\frac{3x}{5x}\\)", "B. \\(\\frac{5x}{3x}\\)", "C. \\(\\frac{3x}{3x}\\)", "D. \\(\\frac{5}{3}\\)", "E. \\(\\frac{3}{5}\\)"], ans: "D" }
+      ],
+      // SOAL 7
+      [
+        { q: "Hasil dari \\(\\lim_{x \\to 0} \\frac{\\sin^2 4x}{12x \\tan 3x}\\) adalah ....", options: ["A. \\(\\frac{16}{36}\\)", "B. \\(\\frac{4}{36}\\)", "C. \\(\\frac{16}{15}\\)", "D. \\(\\frac{36}{4}\\)", "E. \\(\\frac{36}{16}\\)"], ans: "A" },
+        { q: "Hasil dari \\(\\lim_{x \\to 0} \\frac{12x \\sin 3x}{\\tan^2 4x}\\) adalah ....", options: ["A. \\(\\frac{16}{36}\\)", "B. \\(\\frac{4}{36}\\)", "C. \\(\\frac{15}{16}\\)", "D. \\(\\frac{36}{4}\\)", "E. \\(\\frac{36}{16}\\)"], ans: "E" },
+        { q: "Hasil dari \\(\\lim_{x \\to 0} \\frac{\\sin^2 6x}{2x \\tan 8x}\\) adalah ....", options: ["A. \\(\\frac{16}{36}\\)", "B. \\(\\frac{4}{36}\\)", "C. \\(\\frac{36}{10}\\)", "D. \\(\\frac{36}{4}\\)", "E. \\(\\frac{36}{16}\\)"], ans: "E" },
+        { q: "Hasil dari \\(\\lim_{x \\to 0} \\frac{2x \\sin 8x}{\\tan^2 6x}\\) adalah ....", options: ["A. \\(\\frac{16}{36}\\)", "B. \\(\\frac{4}{36}\\)", "C. \\(\\frac{10}{36}\\)", "D. \\(\\frac{36}{4}\\)", "E. \\(\\frac{36}{16}\\)"], ans: "A" }
+      ],
+      // SOAL 8 (Benar/Salah + gambar). ans = 2 huruf: pernyataan 1 dan 2 (B = Benar, S = Salah).
+      // Skor 1 poin hanya jika kedua pernyataan benar.
+      [
+        { type: "bs", q: stemAyunan("x^2-8x+12", "\\sin (x-2)"),
+          statements: [
+            "Gaya yang timbul dinyatakan dalam \\(\\dfrac{x^2-8x+12}{\\sin (x-2)}\\)",
+            "Jika <i>x</i> mendekati 2 newton maka besar gaya yang timbul adalah \\(-6\\)"
+          ],
+          ans: "BS" },
+        { type: "bs", q: stemAyunan("x^2-6x+8", "\\sin (x-2)"),
+          statements: [
+            "Gaya yang timbul dinyatakan dalam \\(\\dfrac{\\sin (x-2)}{x^2-6x+8}\\)",
+            "Jika <i>x</i> mendekati 2 newton maka besar gaya yang timbul adalah \\(-2\\)"
+          ],
+          ans: "SB" },
+        { type: "bs", q: stemAyunan("x^2-7x+12", "\\sin (x-3)"),
+          statements: [
+            "Gaya yang timbul dinyatakan dalam \\(\\dfrac{x^2-7x+12}{\\sin (x-3)}\\)",
+            "Jika <i>x</i> mendekati 3 newton maka besar gaya yang timbul adalah \\(-4\\)"
+          ],
+          ans: "BS" },
+        { type: "bs", q: stemAyunan("x^2-7x+10", "\\sin (x-2)"),
+          statements: [
+            "Gaya yang timbul dinyatakan dalam \\(\\dfrac{\\sin (x-2)}{x^2-7x+10}\\)",
+            "Jika <i>x</i> mendekati 2 newton maka besar gaya yang timbul adalah \\(-3\\)"
+          ],
+          ans: "SB" }
+      ],
+      // SOAL 9
+      [
+        { q: "Hasil dari \\(\\lim_{x \\to \\infty} \\frac{3-7x+8x^2-6x^3}{3x^2+8x-4}\\) adalah ....", options: ["A. \\(1\\)", "B. \\(0\\)", "C. \\(\\infty\\)", "D. \\(-\\infty\\)", "E. \\(-2\\)"], ans: "D" },
+        { q: "Hasil dari \\(\\lim_{x \\to \\infty} \\frac{1-8x+7x^2-4x^3}{2x^3+8x-5}\\) adalah ....", options: ["A. \\(1\\)", "B. \\(0\\)", "C. \\(\\infty\\)", "D. \\(-1\\)", "E. \\(-2\\)"], ans: "E" },
+        { q: "Hasil dari \\(\\lim_{x \\to \\infty} \\frac{6-7x+x^2-4x^3}{2x^2+x-7}\\) adalah ....", options: ["A. \\(1\\)", "B. \\(0\\)", "C. \\(\\infty\\)", "D. \\(-\\infty\\)", "E. \\(-2\\)"], ans: "D" },
+        { q: "Hasil dari \\(\\lim_{x \\to \\infty} \\frac{5-x+9x^2-8x^3}{4x^3+7x-9}\\) adalah ....", options: ["A. \\(1\\)", "B. \\(0\\)", "C. \\(\\infty\\)", "D. \\(-1\\)", "E. \\(-2\\)"], ans: "E" }
+      ],
+      // SOAL 10
+      [
+        { q: "Hasil dari \\(\\lim_{x \\to \\infty} \\frac{(8x-5)(2x^2-7)}{6-8x+7x^2-4x^3}\\) adalah ....", options: ["A. \\(1\\)", "B. \\(0\\)", "C. \\(\\infty\\)", "D. \\(-1\\)", "E. \\(-4\\)"], ans: "E" },
+        { q: "Hasil dari \\(\\lim_{x \\to \\infty} \\frac{(8x^3-x^2)(9-x)}{1-7x+9x^2-2x^3}\\) adalah ....", options: ["A. \\(1\\)", "B. \\(0\\)", "C. \\(\\infty\\)", "D. \\(-1\\)", "E. \\(-4\\)"], ans: "C" },
+        { q: "Hasil dari \\(\\lim_{x \\to \\infty} \\frac{(6x-9)(2x^2-7)}{1-8x+9x^2-4x^3}\\) adalah ....", options: ["A. \\(1\\)", "B. \\(0\\)", "C. \\(\\infty\\)", "D. \\(-1\\)", "E. \\(-3\\)"], ans: "E" },
+        { q: "Hasil dari \\(\\lim_{x \\to \\infty} \\frac{(x-1)(6x^3-9x^2)}{3-9x+7x^2-2x^3}\\) adalah ....", options: ["A. \\(1\\)", "B. \\(0\\)", "C. \\(\\infty\\)", "D. \\(-\\infty\\)", "E. \\(-3\\)"], ans: "D" }
+      ],
+      // SOAL 11
+      [
+        { q: "Nilai dari \\(\\lim_{x \\to \\infty} \\left( \\sqrt{x^2-8x-1}-\\sqrt{3x^2-7x+3} \\right)\\) adalah ....", options: ["A. \\(-\\infty\\)", "B. \\(0\\)", "C. \\(1\\)", "D. \\(3\\)", "E. \\(\\infty\\)"], ans: "A" },
+        { q: "Nilai dari \\(\\lim_{x \\to \\infty} \\left( \\sqrt{3x^2-7x-1}-\\sqrt{x^2-x+5} \\right)\\) adalah ....", options: ["A. \\(0\\)", "B. \\(1\\)", "C. \\(3\\)", "D. \\(6\\)", "E. \\(\\infty\\)"], ans: "E" },
+        { q: "Nilai dari \\(\\lim_{x \\to \\infty} \\left( \\sqrt{x^2-5x-7}-\\sqrt{3x^2-4x+1} \\right)\\) adalah ....", options: ["A. \\(-\\infty\\)", "B. \\(0\\)", "C. \\(1\\)", "D. \\(3\\)", "E. \\(\\infty\\)"], ans: "A" },
+        { q: "Nilai dari \\(\\lim_{x \\to \\infty} \\left( \\sqrt{3x^2-4x-5}-\\sqrt{x^2-6x+7} \\right)\\) adalah ....", options: ["A. \\(0\\)", "B. \\(1\\)", "C. \\(3\\)", "D. \\(6\\)", "E. \\(\\infty\\)"], ans: "E" }
+      ],
+      // SOAL 12
+      [
+        { q: "Hasil dari \\(\\lim_{x \\to \\infty} \\left( \\sqrt{4x^2+8x}-(2x-3) \\right)\\) adalah ....", options: ["A. \\(1\\)", "B. \\(2\\)", "C. \\(3\\)", "D. \\(4\\)", "E. \\(5\\)"], ans: "E" },
+        { q: "Hasil dari \\(\\lim_{x \\to \\infty} \\left( \\sqrt{4x^2+8x}-(2x-5) \\right)\\) adalah ....", options: ["A. \\(3\\)", "B. \\(4\\)", "C. \\(5\\)", "D. \\(6\\)", "E. \\(7\\)"], ans: "E" },
+        { q: "Hasil dari \\(\\lim_{x \\to \\infty} \\left( \\sqrt{9x^2+6x}-(3x-2) \\right)\\) adalah ....", options: ["A. \\(1\\)", "B. \\(2\\)", "C. \\(3\\)", "D. \\(4\\)", "E. \\(5\\)"], ans: "C" },
+        { q: "Hasil dari \\(\\lim_{x \\to \\infty} \\left( \\sqrt{9x^2+6x}-(3x-4) \\right)\\) adalah ....", options: ["A. \\(3\\)", "B. \\(4\\)", "C. \\(5\\)", "D. \\(6\\)", "E. \\(7\\)"], ans: "C" }
+      ]
+    ];
+
+    let currentUser = null, examTimerInterval = null, examTimeLeftSeconds = 30 * 60;
+    let selectedQuestions = [], userAnswers = {}, raguStatus = {}, currentQuestionIdx = 0, cheatCount = 0;
+    let configLoaded = false;
+
+    window.onload = () => { setupCheatingDetection(); };
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('username').value.trim();
+      const p = document.getElementById('password').value.trim();
+      const err = document.getElementById('login-error');
+      err.classList.add('hidden');
+
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=login&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`);
+        const result = await res.json();
+
+        if (result.status === "success") {
+          if (result.role === "admin") {
+            currentUser = { username: 'admin', role: 'admin' };
+            showPage('page-admin');
+            fetchAdminData();
+            setInterval(fetchAdminData, 5000);
+          } else {
+            const schedRes = await fetch(SCRIPT_URL + "?action=getConfig");
+            const sched = await schedRes.json();
+            examTimeLeftSeconds = (sched.duration || 30) * 60;
+
+            currentUser = { username: result.username, nama: result.nama, kelas: result.kelas, role: 'peserta' };
+            document.getElementById('student-info').innerHTML = `<b>Nama:</b> ${result.nama} | <b>Kelas:</b> ${result.kelas}`;
+            
+            if (selectedQuestions.length === 0) generateRandomQuestions();
+            showPage('page-rules');
+          }
+        } else {
+          err.innerText = result.message;
+          err.classList.remove('hidden');
+        }
+      } catch (errNet) {
+        err.innerText = "Gagal terhubung ke server database.";
+        err.classList.remove('hidden');
+      }
+    }
+
+    function logout() { currentUser = null; configLoaded = false; showPage('page-login'); }
+    function showPage(id) { ['page-login', 'page-admin', 'page-hasil', 'page-rules', 'page-exam'].forEach(p => document.getElementById(p).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+    
+    function showHasilPage() {
+      showPage('page-hasil');
+      fetchHasilData();
+    }
+
+    function showAdminDashboard() {
+      showPage('page-admin');
+      fetchAdminData();
+    }
+
+    function generateRandomQuestions() { selectedQuestions = BANK_SOAL.map(b => b[Math.floor(Math.random() * b.length)]); }
+
+    async function fetchAdminData() {
+      try {
+        const resToken = await fetch(SCRIPT_URL + "?action=getToken");
+        const dataToken = await resToken.json();
+        document.getElementById('admin-token').innerText = dataToken.token;
+        const m = String(Math.floor(dataToken.timeLeft / 60)).padStart(2, '0');
+        const s = String(dataToken.timeLeft % 60).padStart(2, '0');
+        document.getElementById('token-timer').innerText = `Reset dalam ${m}:${s}`;
+
+        if (!configLoaded) {
+          const resCfg = await fetch(SCRIPT_URL + "?action=getConfig");
+          const cfg = await resCfg.json();
+          if(cfg.startDate) document.getElementById('cfg-start-date').value = cfg.startDate;
+          if(cfg.startTime) document.getElementById('cfg-start-time').value = cfg.startTime;
+          if(cfg.endDate) document.getElementById('cfg-end-date').value = cfg.endDate;
+          if(cfg.endTime) document.getElementById('cfg-end-time').value = cfg.endTime;
+          if(cfg.duration) document.getElementById('cfg-duration').value = cfg.duration;
+          configLoaded = true;
+        }
+
+        const resMon = await fetch(SCRIPT_URL + "?action=getMonitor");
+        const dataMon = await resMon.json();
+        const tbody = document.getElementById('table-peserta-body');
+        tbody.innerHTML = "";
+        if (dataMon.length <= 1) {
+          tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">Belum ada peserta aktif.</td></tr>`;
+        } else {
+          for (let i = 1; i < dataMon.length; i++) {
+            let cleanUser = String(dataMon[i][0]).replace(/^'/, '');
+            tbody.innerHTML += `<tr class="border-b"><td class="p-3">${cleanUser}</td><td class="p-3 font-semibold">${dataMon[i][1]}</td><td class="p-3">${dataMon[i][2]}</td><td class="p-3"><span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded font-bold">${dataMon[i][3]}</span></td><td class="p-3">${dataMon[i][4]}</td><td class="p-3 text-red-600 font-bold">${dataMon[i][5]} Kali</td></tr>`;
+          }
+        }
+      } catch(e) { console.error(e); }
+    }
+
+    async function fetchHasilData() {
+      try {
+        const resHasil = await fetch(SCRIPT_URL + "?action=getHasil");
+        const dataHasil = await resHasil.json();
+        const tbodyHasil = document.getElementById('table-hasil-body');
+        tbodyHasil.innerHTML = "";
+        if (dataHasil.length <= 1) {
+          tbodyHasil.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-400">Belum ada hasil ujian.</td></tr>`;
+        } else {
+          for (let i = 1; i < dataHasil.length; i++) {
+            const row = dataHasil[i];
+            const timeStr = new Date(row[0]).toLocaleString();
+            let cleanUser = String(row[1]).replace(/^'/, '');
+            tbodyHasil.innerHTML += `<tr class="border-b">
+              <td class="p-3 text-xs text-gray-500">${timeStr}</td>
+              <td class="p-3">${cleanUser}</td>
+              <td class="p-3 font-semibold">${row[2]}</td>
+              <td class="p-3">${row[3]}</td>
+              <td class="p-3">${row[5]} / ${row[6]}</td>
+              <td class="p-3 font-bold text-blue-600">${row[7]}</td>
+              <td class="p-3 text-center"><button onclick="deleteHasil('${cleanUser}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-semibold"><i class="fa-solid fa-trash mr-1"></i> Delete</button></td>
+            </tr>`;
+          }
+        }
+      } catch(e) { console.error(e); }
+    }
+
+    async function saveAdminConfig() {
+      const payload = {
+        action: "saveConfig",
+        startDate: document.getElementById('cfg-start-date').value,
+        startTime: document.getElementById('cfg-start-time').value,
+        endDate: document.getElementById('cfg-end-date').value,
+        endTime: document.getElementById('cfg-end-time').value,
+        duration: parseInt(document.getElementById('cfg-duration').value)
+      };
+      await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+      alert("Pengaturan jadwal berhasil disimpan!");
+    }
+
+    async function resetAdminConfig() {
+      if(!confirm("Yakin ingin mereset pengaturan jadwal ujian?")) return;
+      await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ action: "resetConfig" }) });
+      document.getElementById('cfg-start-date').value = "";
+      document.getElementById('cfg-start-time').value = "";
+      document.getElementById('cfg-end-date').value = "";
+      document.getElementById('cfg-end-time').value = "";
+      document.getElementById('cfg-duration').value = "30";
+      configLoaded = false;
+      alert("Pengaturan jadwal berhasil direset!");
+    }
+
+    async function resetMonitorData() {
+      if(!confirm("Yakin ingin mereset data monitoring peserta?")) return;
+      await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ action: "resetMonitor" }) });
+      fetchAdminData();
+      alert("Monitoring berhasil direset!");
+    }
+
+    async function deleteHasil(username) {
+      if(!confirm(`Yakin ingin menghapus data ujian peserta (${username}) agar dapat mengulangi ujian?`)) return;
+      await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ action: "deleteHasil", username: username }) });
+      setTimeout(fetchHasilData, 1000);
+      alert("Data berhasil dihapus. Peserta kini dapat mengulangi ujian.");
+    }
+
+    async function validateToken() {
+      const input = document.getElementById('input-token').value.trim().toUpperCase();
+      const err = document.getElementById('token-error');
+      try {
+        const res = await fetch(SCRIPT_URL + "?action=getToken");
+        const data = await res.json();
+        if (input === data.token) {
+          err.classList.add('hidden');
+          startExam();
+        } else {
+          err.innerText = "Token salah atau kadaluwarsa!";
+          err.classList.remove('hidden');
+        }
+      } catch(e) { alert("Gagal memverifikasi token."); }
+    }
+
+    function startExam() {
+      showPage('page-exam');
+      startExamTimer();
+      renderQuestion(0);
+      updateCloudMonitor();
+    }
+
+    function startExamTimer() {
+      if(examTimerInterval) clearInterval(examTimerInterval);
+      examTimerInterval = setInterval(() => {
+        if(examTimeLeftSeconds <= 0) { clearInterval(examTimerInterval); submitExam(); return; }
+        examTimeLeftSeconds--;
+        const h = String(Math.floor(examTimeLeftSeconds / 3600)).padStart(2, '0');
+        const m = String(Math.floor((examTimeLeftSeconds % 3600) / 60)).padStart(2, '0');
+        const s = String(examTimeLeftSeconds % 60).padStart(2, '0');
+        document.getElementById('exam-timer').innerText = `${h}:${m}:${s}`;
+      }, 1000);
+    }
+
+    function renderQuestion(idx) {
+      currentQuestionIdx = idx;
+      const q = selectedQuestions[idx];
+      document.getElementById('question-number-title').innerText = `Soal No. ${idx + 1}`;
+      document.getElementById('question-text').innerHTML = q.q.replace(/\\\(/g, '\\(\\displaystyle ');
+      const optContainer = document.getElementById('options-container');
+      optContainer.innerHTML = '';
+      document.getElementById('question-type-badge').innerText = q.type === 'bs' ? 'Benar / Salah' : 'Pilihan Ganda';
+      if (q.type === 'bs') {
+        optContainer.innerHTML = renderBenarSalah(q, idx);
+      } else {
+        q.options.forEach(opt => {
+          const key = opt.charAt(0);
+          const isChecked = userAnswers[idx] === key;
+          optContainer.innerHTML += `<label class="flex items-center p-3.5 rounded-lg border cursor-pointer transition ${isChecked ? 'bg-blue-50 border-blue-500 font-semibold text-blue-900' : 'bg-white border-gray-200'}"><input type="radio" name="opt" value="${key}" ${isChecked ? 'checked' : ''} onchange="selectAnswer('${key}')" class="w-4 h-4 text-blue-600"><span class="ml-3 text-sm">${opt}</span></label>`;
+        });
+      }
+      document.getElementById('chk-ragu').checked = !!raguStatus[idx];
+      document.getElementById('btn-prev').style.visibility = idx === 0 ? 'hidden' : 'visible';
+      if (idx === selectedQuestions.length - 1) {
+        document.getElementById('btn-next').classList.add('hidden');
+        document.getElementById('btn-finish').classList.remove('hidden');
+      } else {
+        document.getElementById('btn-next').classList.remove('hidden');
+        document.getElementById('btn-finish').classList.add('hidden');
+      }
+      renderMapSoal();
+      typesetMath();
+    }
+
+    // Render rumus; jika MathJax belum selesai dimuat, coba lagi sebentar
+    function typesetMath() {
+      const targets = [document.getElementById('question-text'), document.getElementById('options-container')];
+      if (window.MathJax && MathJax.typesetPromise) {
+        MathJax.typesetPromise(targets).catch(err => console.error('MathJax error:', err));
+      } else {
+        setTimeout(typesetMath, 200);
+      }
+    }
+
+    function selectAnswer(key) { userAnswers[currentQuestionIdx] = key; renderMapSoal(); updateCloudMonitor(); }
+
+    // ---- Soal tipe Benar/Salah: jawaban disimpan sebagai teks 2 huruf, mis. "BS" ("-" = belum dijawab)
+    function renderBenarSalah(q, idx) {
+      const cur = (userAnswers[idx] || '--').split('');
+      const rows = q.statements.map((t, i) => `
+        <tr class="border-t">
+          <td class="p-3 align-middle">${i + 1}. ${t}</td>
+          <td class="p-3 text-center align-middle"><input type="radio" name="bs_${i}" value="B" ${cur[i] === 'B' ? 'checked' : ''} onchange="selectBS(${i}, 'B')" class="w-4 h-4 text-blue-600 cursor-pointer"></td>
+          <td class="p-3 text-center align-middle"><input type="radio" name="bs_${i}" value="S" ${cur[i] === 'S' ? 'checked' : ''} onchange="selectBS(${i}, 'S')" class="w-4 h-4 text-blue-600 cursor-pointer"></td>
+        </tr>`).join('');
+      return `
+        <div class="overflow-x-auto border border-gray-300 rounded-lg">
+          <table class="w-full text-sm text-gray-800">
+            <thead class="bg-gray-100 text-gray-700">
+              <tr><th class="p-2.5 text-left font-semibold">Pernyataan</th><th class="p-2.5 w-20 text-center font-semibold">Benar</th><th class="p-2.5 w-20 text-center font-semibold">Salah</th></tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        ${q.note ? `<p class="mt-3 text-sm text-gray-600">${q.note}</p>` : ''}`;
+    }
+
+    function selectBS(i, val) {
+      const cur = (userAnswers[currentQuestionIdx] || '--').split('');
+      cur[i] = val;
+      userAnswers[currentQuestionIdx] = cur.join('');
+      renderMapSoal(); updateCloudMonitor();
+    }
+
+    // Soal dianggap terjawab: pilihan ganda = ada jawaban; Benar/Salah = kedua pernyataan sudah dipilih
+    function isAnswered(idx) {
+      const a = userAnswers[idx];
+      if (!a) return false;
+      const q = selectedQuestions[idx];
+      return (q && q.type === 'bs') ? !a.includes('-') : true;
+    }
+    function toggleRagu() { raguStatus[currentQuestionIdx] = document.getElementById('chk-ragu').checked; renderMapSoal(); }
+    function nextQuestion() { if(currentQuestionIdx < 11) renderQuestion(currentQuestionIdx + 1); }
+    function prevQuestion() { if(currentQuestionIdx > 0) renderQuestion(currentQuestionIdx - 1); }
+
+    function renderMapSoal() {
+      const grid = document.getElementById('grid-map-soal');
+      if(!grid) return;
+      grid.innerHTML = '';
+      selectedQuestions.forEach((_, idx) => {
+        let bg = "bg-red-500 text-white";
+        if (raguStatus[idx]) bg = "bg-yellow-400 text-gray-900 font-bold";
+        else if (isAnswered(idx)) bg = "bg-green-500 text-white";
+        grid.innerHTML += `<button onclick="renderQuestion(${idx})" class="h-10 w-full rounded font-bold text-xs flex items-center justify-center ${bg} ${idx === currentQuestionIdx ? 'ring-2 ring-blue-800' : ''}">${idx + 1}</button>`;
+      });
+    }
+
+    function setupCheatingDetection() {
+      const trigger = () => {
+        if (!document.getElementById('page-exam').classList.contains('hidden')) {
+          cheatCount++;
+          updateCloudMonitor();
+          document.getElementById('modal-cheat').classList.remove('hidden');
+        }
+      };
+      window.addEventListener('blur', trigger);
+      document.addEventListener('visibilitychange', () => { if (document.hidden) trigger(); });
+    }
+
+    function acknowledgeCheat() {
+      document.getElementById('modal-cheat').classList.add('hidden');
+      showPage('page-rules');
+      document.getElementById('input-token').value = '';
+    }
+
+    function showFinishConfirmation() { document.getElementById('modal-finish').classList.remove('hidden'); }
+    function closeFinishModal() { document.getElementById('modal-finish').classList.add('hidden'); }
+
+    async function submitExam() {
+      closeFinishModal();
+      clearInterval(examTimerInterval);
+      let score = 0;
+      selectedQuestions.forEach((q, idx) => { if (userAnswers[idx] === q.ans) score++; });
+
+      const payload = {
+        action: "submitExam",
+        username: currentUser.username,
+        nama: currentUser.nama,
+        kelas: currentUser.kelas,
+        answers: userAnswers,
+        score: score,
+        totalQuestions: selectedQuestions.length
+      };
+
+      try {
+        await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+        alert("Ujian selesai! Jawaban Anda telah dikirim.");
+        logout();
+      } catch(e) { alert("Gagal mengirim jawaban."); }
+    }
+
+    async function updateCloudMonitor() {
+      if(!currentUser || currentUser.role !== 'peserta') return;
+      const payload = {
+        action: "updateMonitor",
+        username: currentUser.username,
+        nama: currentUser.nama,
+        kelas: currentUser.kelas,
+        status: "MENGERJAKAN",
+        progress: Object.keys(userAnswers).filter(k => isAnswered(k)).length + " / 12 Soal",
+        cheat: cheatCount
+      };
+      fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+    }
+  </script>
+</body>
+</html>
